@@ -1,0 +1,58 @@
+version: "3"
+
+services:
+  hadoop-zk-1:
+    image: confluentinc/cp-zookeeper:7.0.1
+    container_name: hadoop-zk-1
+    hostname: hadoop-zk-1
+    networks:
+      - hadoop-net
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  hadoop-jn-1:
+    image: docker.io/library/hdfs-ha
+    container_name: hadoop-jn-1
+    hostname: hadoop-jn-1
+    depends_on:
+      - "hadoop-zk-1"
+    networks:
+      - hadoop-net
+    volumes:
+      - D:\docker\hadoop-jn-1:/mnt/hadoop
+      - J:\docker\hadoop\logs:/usr/local/hadoop/logs
+    command: ["/etc/bootstrap.sh", "-d", "journalnode"]
+    environment:
+      NNODE1_IP: nn1
+      NNODE2_IP: nn2
+      JN_IPS: hadoop-jn-1:8485
+      ZK_IPS: hadoop-zk-1:2181
+      CLUSTER_NAME: ha-cluster
+
+  nn1:
+    image: docker.io/library/hdfs-ha
+    container_name: nn1
+    hostname: nn1
+    networks:
+      - hadoop-net
+    volumes:
+      - E:\docker\hadoop\nn1:/mnt/hadoop
+      - J:\docker\hadoop\logs:/usr/local/hadoop/logs
+    ports:
+      - 50060:50070
+      - 9820:9830
+    depends_on:
+      - "hadoop-jn-1"
+    command: ["/etc/bootstrap.sh", "-d", "format"]
+    environment:
+      NNODE1_IP: nn1
+      NNODE2_IP: nn2
+      JN_IPS: hadoop-jn-1:8485
+      ZK_IPS: hadoop-zk-1:2181
+      CLUSTER_NAME: ha-cluster
+
+networks:
+  hadoop-net:
+
+    
