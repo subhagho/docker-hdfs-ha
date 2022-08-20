@@ -65,8 +65,6 @@ sed "s/CLUSTER_NAME/$CLUSTER_NAME/" /usr/local/hadoop/etc/hadoop/hdfs-site.xml.t
 
 sed "s/CLUSTER_NAME/$CLUSTER_NAME/" /usr/local/hadoop/etc/hadoop/core-site.xml.template > /usr/local/hadoop/etc/hadoop/core-site.xml
 
-ls -l /usr/local/hadoop/etc/hadoop
-
 echo SERVER=$server CLUSTER_NAME=$CLUSTER_NAME NNODE1_IP=$NNODE1_IP NNODE2_IP=$NNODE2_IP JNODES=$JNODES ZK_IPS=$ZK_IPS
 
 if [[ $server = "format" ]]; then
