@@ -29,6 +29,7 @@ services:
       JN_IPS: hadoop-jn-1:8485
       ZK_IPS: hadoop-zk-1:2181
       CLUSTER_NAME: ha-cluster
+      HTTP_PORT: 40060
 
   nn1:
     image: docker.io/library/hdfs-ha
@@ -39,9 +40,6 @@ services:
     volumes:
       - E:\docker\hadoop\nn1:/mnt/hadoop
       - J:\docker\hadoop\logs:/usr/local/hadoop/logs
-    ports:
-      - 50060:50070
-      - 9820:9830
     depends_on:
       - "hadoop-jn-1"
     command: ["/etc/bootstrap.sh", "-d", "format"]
@@ -51,6 +49,7 @@ services:
       JN_IPS: hadoop-jn-1:8485
       ZK_IPS: hadoop-zk-1:2181
       CLUSTER_NAME: ha-cluster
+      HTTP_PORT: 40060
 
 networks:
   hadoop-net:

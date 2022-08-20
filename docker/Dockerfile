@@ -1,8 +1,6 @@
 # Hadoop image
 FROM openjdk:11
 
-RUN curl -k https://dlcdn.apache.org/hadoop/common/hadoop-2.10.2/hadoop-2.10.2.tar.gz | tar -xz -C /usr/local/
-RUN cd /usr/local && ln -s ./hadoop-2.10.2 hadoop
 
 RUN apt-get update \
   && apt-get -y install bash \
@@ -21,6 +19,13 @@ ENV HADOOP_YARN_HOME /usr/local/hadoop
 ENV HADOOP_CONF_DIR /usr/local/hadoop/etc/hadoop
 ENV YARN_CONF_DIR $HADOOP_PREFIX/etc/hadoop
 
+RUN groupadd --gid 7000 hadoop
+RUN useradd -ms /bin/bash -g hadoop --uid 7000 hadoop
+RUN mkdir -p /mnt/hadoop/dfs/name && mkdir -p /mnt/hadoop/dfs/data && mkdir -p /mnt/hadoop/journal/data
+
+RUN curl -k https://dlcdn.apache.org/hadoop/common/hadoop-2.10.2/hadoop-2.10.2.tar.gz | tar -xz -C /usr/local/
+RUN cd /usr/local && ln -s ./hadoop-2.10.2 hadoop
+
 WORKDIR /usr/local/hadoop
 
 RUN sed -i '/^export JAVA_HOME/ s:.*:export JAVA_HOME=/usr/local/openjdk-11\nexport HADOOP_PREFIX=/usr/local/hadoop\nexport HADOOP_HOME=/usr/local/hadoop\n:' $HADOOP_PREFIX/etc/hadoop/hadoop-env.sh
@@ -28,16 +33,22 @@ RUN sed -i '/^export HADOOP_CONF_DIR/ s:.*:export HADOOP_CONF_DIR=/usr/local/had
 
 RUN chmod +x /usr/local/hadoop/etc/hadoop/*-env.sh
 
-RUN mkdir -p /mnt/hadoop/dfs/name && mkdir -p /mnt/hadoop/dfs/data && mkdir -p /mnt/hadoop/journal/data
 
 ADD core-site.xml.template /usr/local/hadoop/etc/hadoop/core-site.xml.template
 ADD hdfs-site.xml.template /usr/local/hadoop/etc/hadoop/hdfs-site.xml.template
 
 ADD bootstrap.sh /etc/bootstrap.sh
 RUN chown root:root /etc/bootstrap.sh && chmod a+x /etc/bootstrap.sh
+ADD run.sh /etc/run.sh
+RUN chmod +x /etc/run.sh
+
+RUN chown hadoop:hadoop /etc/run.sh
 
 ADD fence.sh /etc/fence.sh
 RUN chown root:root /etc/fence.sh && chmod a+x /etc/fence.sh
+
+RUN chown -R hadoop:hadoop /usr/local/hadoop
+RUN chown -R hadoop:hadoop /mnt/hadoop/
 
 CMD ["/etc/bootstrap.sh", "-d"]
 
